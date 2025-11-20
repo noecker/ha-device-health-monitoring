@@ -105,8 +105,21 @@ export class DeviceHealthPanel extends LitElement {
       this._devices = this._devices.map((d) =>
         d.entity_id === entityId ? { ...d, is_excluded: !d.is_excluded } : d
       );
-      // Reload to get fresh data
-      await this._loadData();
+      // Also update the settings to keep stats in sync
+      const device = this._devices.find(d => d.entity_id === entityId);
+      if (device) {
+        if (device.is_excluded) {
+          this._settings = {
+            ...this._settings,
+            excluded_entities: [...this._settings.excluded_entities, entityId]
+          };
+        } else {
+          this._settings = {
+            ...this._settings,
+            excluded_entities: this._settings.excluded_entities.filter(id => id !== entityId)
+          };
+        }
+      }
     } catch (err) {
       console.error('Failed to toggle exclusion:', err);
     }

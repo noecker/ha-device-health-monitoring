@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2025-11-20
+
+### Fixed
+- **Scroll position maintained** when toggling device exclusions in custom panel
+  - Removed unnecessary data reload that caused scroll-to-top behavior
+  - Panel now keeps scroll position when checking/unchecking devices
+  - Statistics update immediately without full page refresh
+
 ## [2.0.0] - 2025-11-20
 
 ### Added
