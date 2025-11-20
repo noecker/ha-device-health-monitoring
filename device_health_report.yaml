@@ -34,13 +34,35 @@ blueprint:
       selector:
         boolean:
 
+    exclusion_mode:
+      name: Exclusion Mode
+      description: How to manage excluded entities
+      default: "manual"
+      selector:
+        select:
+          options:
+            - label: "Manual (comma-separated list)"
+              value: "manual"
+            - label: "Use Exclusions Manager Integration"
+              value: "integration"
+
     excluded_entities:
-      name: Excluded Entities
-      description: "Comma-separated list of entity IDs to exclude (e.g., sensor.battery_1, sensor.battery_2)"
+      name: Excluded Entities (Manual Mode)
+      description: "Comma-separated list of entity IDs to exclude (e.g., sensor.battery_1, sensor.battery_2). Only used if Exclusion Mode is set to Manual."
       default: ""
       selector:
         text:
           multiline: true
+
+    exclusion_sensor:
+      name: Exclusion Manager Sensor (Integration Mode)
+      description: "Select the sensor from Device Health Exclusions Manager integration. Only used if Exclusion Mode is set to Integration."
+      default: ""
+      selector:
+        entity:
+          filter:
+            - integration: device_health_exclusions
+              domain: sensor
 
 trigger:
   - platform: time
@@ -50,7 +72,7 @@ condition:
   - condition: template
     value_template: >
       {% set send_always = not (send_only_if_issues | default(true)) %}
-      {% set excluded = excluded_entities.split(',') | map('trim') | list if excluded_entities else [] %}
+      {% set excluded = excluded_entities if excluded_entities is iterable and excluded_entities is not string else [] %}
       {% set low_battery_count = namespace(value=0) %}
       {% for device in states.sensor
          | selectattr('attributes.device_class', 'defined')
@@ -97,7 +119,7 @@ action:
             <p>Report generated: {{ now().strftime('%B %d, %Y at %I:%M %p') }}</p>
 
             <h2 class="low-battery">⚠️ Low Battery Devices</h2>
-            {% set excluded = excluded_entities.split(',') | map('trim') | list if excluded_entities else [] %}
+            {% set excluded = excluded_entities if excluded_entities is iterable and excluded_entities is not string else [] %}
             {% set low_batteries = namespace(devices=[]) %}
             {% for device in states.sensor
                | selectattr('attributes.device_class', 'defined')
@@ -152,6 +174,14 @@ action:
 variables:
   battery_threshold: !input battery_threshold
   send_only_if_issues: !input send_only_if_issues
-  excluded_entities: !input excluded_entities
+  exclusion_mode: !input exclusion_mode
+  excluded_entities_manual: !input excluded_entities
+  exclusion_sensor: !input exclusion_sensor
+  excluded_entities: >
+    {% if exclusion_mode == 'integration' %}
+      {{ state_attr(exclusion_sensor, 'excluded_entities') | default([]) }}
+    {% else %}
+      {{ excluded_entities_manual.split(',') | map('trim') | list if excluded_entities_manual else [] }}
+    {% endif %}
 
 mode: single

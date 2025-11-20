@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release:
+    name: Create Release Packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Update manifest version
+        run: |
+          sed -i 's/"version": ".*"/"version": "${{ steps.get_version.outputs.VERSION }}"/' custom_components/device_health_exclusions/manifest.json
+
+      - name: Create integration package
+        run: |
+          cd custom_components
+          zip -r ../device_health_exclusions-${{ steps.get_version.outputs.VERSION }}.zip device_health_exclusions/
+
+      - name: Create complete package
+        run: |
+          mkdir -p complete_package
+          cp -r custom_components complete_package/
+          cp device_health_report.yaml complete_package/
+          cp README.md INSTALL.md QUICKSTART.md INSTALLATION.md complete_package/
+          cd complete_package
+          zip -r ../device_health_monitoring-complete-${{ steps.get_version.outputs.VERSION }}.zip .
+
+      - name: Upload integration package to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./device_health_exclusions-${{ steps.get_version.outputs.VERSION }}.zip
+          asset_name: device_health_exclusions-${{ steps.get_version.outputs.VERSION }}.zip
+          asset_content_type: application/zip
+
+      - name: Upload complete package to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./device_health_monitoring-complete-${{ steps.get_version.outputs.VERSION }}.zip
+          asset_name: device_health_monitoring-complete-${{ steps.get_version.outputs.VERSION }}.zip
+          asset_content_type: application/zip

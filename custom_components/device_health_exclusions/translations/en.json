@@ -1,0 +1,44 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Device Health Exclusions Manager",
+        "description": "Configure which devices to exclude from health reports",
+        "data": {
+          "battery_threshold": "Battery threshold (%)"
+        },
+        "data_description": {
+          "battery_threshold": "Alert when battery drops below this level"
+        }
+      },
+      "select_devices": {
+        "title": "Select Devices to Exclude",
+        "description": "Found {device_count} devices with issues. Select which ones to exclude from reports.",
+        "data": {
+          "excluded_entities": "Devices to exclude"
+        }
+      }
+    },
+    "abort": {
+      "no_problem_devices": "No devices with low battery or unavailable status found. Try adjusting the battery threshold or wait for devices to report issues."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Update Exclusions",
+        "description": "Update your device health exclusion settings",
+        "data": {
+          "battery_threshold": "Battery threshold (%)"
+        }
+      },
+      "select_devices": {
+        "title": "Select Devices to Exclude",
+        "description": "Found {device_count} devices with issues. Select which ones to exclude from reports.",
+        "data": {
+          "excluded_entities": "Devices to exclude"
+        }
+      }
+    }
+  }
+}

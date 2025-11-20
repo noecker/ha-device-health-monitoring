@@ -1,0 +1,11 @@
+{
+  "domain": "device_health_exclusions",
+  "name": "Device Health Exclusions Manager",
+  "codeowners": [],
+  "config_flow": true,
+  "documentation": "https://github.com/YOUR_USERNAME/ha-customizations",
+  "integration_type": "helper",
+  "iot_class": "local_push",
+  "requirements": [],
+  "version": "1.0.0"
+}
