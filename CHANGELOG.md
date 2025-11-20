@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2025-11-20
+
+### Added
+- **Full-page custom panel interface** for Device Health Exclusions Manager
+- **WebSocket API** for real-time device management
+  - `get_problem_devices`: Fetch devices with issues
+  - `get_exclusions`: Retrieve current exclusion settings
+  - `update_exclusions`: Update exclusion list
+  - `toggle_exclusion`: Toggle single device exclusion
+- **Modern Lit-based frontend** with TypeScript
+  - Table view for device management
+  - Real-time exclusion toggling (no page reload needed)
+  - Advanced filtering (All/Not Excluded/Excluded)
+  - Search by device name or entity ID
+  - Visual statistics dashboard
+  - Battery threshold adjustment in UI
+- **Panel registration** in Home Assistant sidebar
+  - Direct access via Settings → Device Health
+  - Full-page experience (not modal-based)
+  - Persistent navigation item
+
+### Changed
+- **Config flow still available** for initial setup
+- **Panel is now primary interface** for managing exclusions
+- **Version bumped to 2.0.0** in manifest
+- **Added frontend dependencies** to manifest (frontend, http)
+
+### Technical
+- Lit 3.1.0 web components
+- TypeScript with ES2020 target
+- Rollup bundler with terser minification
+- WebSocket-based real-time updates
+- Static asset serving via Home Assistant HTTP component
+- Source maps included for debugging
+
+### Migration Notes
+- See [MIGRATION_V2.md](MIGRATION_V2.md) for upgrade instructions
+- Existing v1.0.0 installations will preserve settings
+- No breaking changes to blueprint or sensor
+
 ## [1.0.0] - 2024-11-20
 
 ### Added

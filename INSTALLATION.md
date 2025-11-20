@@ -2,12 +2,26 @@
 
 Complete installation guide for the Device Health Monitoring system.
 
+## ✨ Version 2.0.0 - Custom Panel Interface
+
+This guide covers installation of **v2.0.0** which includes a modern **full-page custom panel**!
+
+### What's New
+- **Full-page panel** accessible from Home Assistant sidebar (Settings → Device Health)
+- **Real-time device management** with instant updates
+- **Table view** with filtering, search, and statistics
+- **WebSocket API** for seamless communication
+
+Upgrading from v1.0.0? See [MIGRATION_V2.md](MIGRATION_V2.md)
+
 ## What This Does
 
 The Device Health Exclusions Manager provides a user-friendly interface to:
 1. **View only problem devices** - See a filtered list of devices with low battery or unavailable status
-2. **Multi-select exclusions** - Check boxes next to devices you want to exclude from reports
-3. **Seamless integration** - Works with the Device Health Report blueprint automatically
+2. **Manage exclusions via custom panel** - Full-page interface with table view, filtering, and search
+3. **One-click exclusion toggling** - Real-time updates without page reload
+4. **Visual statistics** - Dashboard showing problem/excluded/reported counts
+5. **Seamless integration** - Works with the Device Health Report blueprint automatically
 
 ---
 
@@ -175,7 +189,7 @@ python3 install.py
 3. Search for "Device Health Exclusions Manager"
 4. Click to start setup
 
-### Step 2: Configure Exclusions
+### Step 2: Configure Exclusions (Initial Setup)
 
 1. **Set Battery Threshold**
    - Enter desired battery percentage (default: 20%)
@@ -188,6 +202,28 @@ python3 install.py
 
 3. **Submit**
    - A sensor is created: `sensor.device_health_exclusions_excluded_entities`
+
+### Step 2b: Using the Custom Panel (v2.0.0)
+
+**After initial setup, use the custom panel for managing exclusions:**
+
+1. **Access the Panel**
+   - Navigate to **Settings** → **Device Health** (heart icon in sidebar)
+   - Or visit: `/device-health-exclusions` directly
+
+2. **Panel Features**
+   - **Statistics Dashboard**: View problem/excluded/reported counts
+   - **Filter Toolbar**: Filter by All/Not Excluded/Excluded
+   - **Search**: Find devices by name or entity ID
+   - **Battery Threshold**: Adjust threshold (updates immediately)
+   - **Table View**: See all problem devices with their status
+
+3. **Managing Exclusions**
+   - **Toggle Checkboxes**: Click checkbox to exclude/include devices
+   - **Real-time Updates**: Changes save immediately (no reload needed)
+   - **Visual Feedback**: Statistics update instantly
+
+The custom panel provides a much better experience than the config flow options menu!
 
 ### Step 3: Create Automation
 
@@ -319,6 +355,14 @@ rm /config/blueprints/automation/device_health_report.yaml
 ✅ Automation created
 
 Now:
+- **Access the custom panel**: Settings → Device Health
+- **Manage exclusions** using the full-page interface
 - Test your automation
-- Update exclusions via the UI
+- Update exclusions via the panel (real-time updates!)
 - Customize the email template if desired
+
+### Using v2.0.0 Custom Panel
+- Access via: **Settings → Device Health** (sidebar)
+- Direct URL: `/device-health-exclusions`
+- Features: Table view, filtering, search, statistics
+- Real-time: No reload needed for changes
