@@ -61,71 +61,73 @@ action:
   - service: !input notify_service
     data:
       title: "🏠 Home Assistant Device Health Report"
-      message: |
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            h2 { border-bottom: 2px solid #ddd; padding-bottom: 10px; }
-            .low-battery { color: #ff9800; }
-            .unavailable { color: #f44336; }
-            ul { list-style-type: none; padding-left: 0; }
-            li { padding: 8px; margin: 5px 0; background: #f5f5f5; border-radius: 4px; }
-            .battery-level { font-weight: bold; float: right; }
-            .no-issues { color: #4caf50; font-size: 18px; }
-          </style>
-        </head>
-        <body>
-          <h1>Device Health Report</h1>
-          <p>Report generated: {{ now().strftime('%B %d, %Y at %I:%M %p') }}</p>
-          
-          <h2 class="low-battery">⚠️ Low Battery Devices</h2>
-          {% set low_batteries = namespace(devices=[]) %}
-          {% for device in states.sensor 
-             | selectattr('attributes.device_class', 'defined')
-             | selectattr('attributes.device_class', 'eq', 'battery') %}
-            {% if device.state not in ['unavailable', 'unknown'] and device.state | float(0) < battery_threshold | int %}
-              {% set low_batteries.devices = low_batteries.devices + [device] %}
+      message: "Device Health Report - {{ now().strftime('%B %d, %Y at %I:%M %p') }}"
+      data:
+        html: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 20px; }
+              h2 { border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+              .low-battery { color: #ff9800; }
+              .unavailable { color: #f44336; }
+              ul { list-style-type: none; padding-left: 0; }
+              li { padding: 8px; margin: 5px 0; background: #f5f5f5; border-radius: 4px; }
+              .battery-level { font-weight: bold; float: right; }
+              .no-issues { color: #4caf50; font-size: 18px; }
+            </style>
+          </head>
+          <body>
+            <h1>Device Health Report</h1>
+            <p>Report generated: {{ now().strftime('%B %d, %Y at %I:%M %p') }}</p>
+
+            <h2 class="low-battery">⚠️ Low Battery Devices</h2>
+            {% set low_batteries = namespace(devices=[]) %}
+            {% for device in states.sensor
+               | selectattr('attributes.device_class', 'defined')
+               | selectattr('attributes.device_class', 'eq', 'battery') %}
+              {% if device.state not in ['unavailable', 'unknown'] and device.state | float(0) < battery_threshold | int %}
+                {% set low_batteries.devices = low_batteries.devices + [device] %}
+              {% endif %}
+            {% endfor %}
+
+            {% if low_batteries.devices | count > 0 %}
+              <ul>
+              {% for device in low_batteries.devices | sort(attribute='state') %}
+                <li>
+                  {{ device.name }}
+                  <span class="battery-level">{{ device.state }}%</span>
+                </li>
+              {% endfor %}
+              </ul>
+            {% else %}
+              <p class="no-issues">✓ All devices have sufficient battery</p>
             {% endif %}
-          {% endfor %}
-          
-          {% if low_batteries.devices | count > 0 %}
-            <ul>
-            {% for device in low_batteries.devices | sort(attribute='state') %}
-              <li>
-                {{ device.name }}
-                <span class="battery-level">{{ device.state }}%</span>
-              </li>
-            {% endfor %}
-            </ul>
-          {% else %}
-            <p class="no-issues">✓ All devices have sufficient battery</p>
-          {% endif %}
-          
-          <h2 class="unavailable">❌ Unavailable Devices</h2>
-          {% set unavailable = states 
-             | selectattr('state', 'in', ['unavailable', 'unknown'])
-             | rejectattr('domain', 'in', ['group', 'automation', 'script', 'scene'])
-             | list %}
-          
-          {% if unavailable | count > 0 %}
-            <ul>
-            {% for device in unavailable | sort(attribute='name') %}
-              <li>{{ device.name }} ({{ device.entity_id }})</li>
-            {% endfor %}
-            </ul>
-          {% else %}
-            <p class="no-issues">✓ All devices are responding</p>
-          {% endif %}
-          
-          <hr>
-          <p style="color: #888; font-size: 12px;">
-            Total devices monitored: {{ states | list | count }}<br>
-            Battery threshold: {{ battery_threshold }}%
-          </p>
-        </body>
-        </html>
+
+            <h2 class="unavailable">❌ Unavailable Devices</h2>
+            {% set unavailable = states
+               | selectattr('state', 'in', ['unavailable', 'unknown'])
+               | rejectattr('domain', 'in', ['group', 'automation', 'script', 'scene'])
+               | list %}
+
+            {% if unavailable | count > 0 %}
+              <ul>
+              {% for device in unavailable | sort(attribute='name') %}
+                <li>{{ device.name }} ({{ device.entity_id }})</li>
+              {% endfor %}
+              </ul>
+            {% else %}
+              <p class="no-issues">✓ All devices are responding</p>
+            {% endif %}
+
+            <hr>
+            <p style="color: #888; font-size: 12px;">
+              Total devices monitored: {{ states | list | count }}<br>
+              Battery threshold: {{ battery_threshold }}%
+            </p>
+          </body>
+          </html>
 
 variables:
   battery_threshold: !input battery_threshold
