@@ -42,12 +42,15 @@ condition:
   - condition: template
     value_template: >
       {% set send_always = not (send_only_if_issues | default(true)) %}
-      {% set low_battery = states.sensor 
+      {% set low_battery_count = namespace(value=0) %}
+      {% for device in states.sensor 
          | selectattr('attributes.device_class', 'defined')
-         | selectattr('attributes.device_class', 'eq', 'battery')
-         | selectattr('state', 'is_number')
-         | selectattr('state', 'lt', battery_threshold | int)
-         | list | count > 0 %}
+         | selectattr('attributes.device_class', 'eq', 'battery') %}
+        {% if device.state not in ['unavailable', 'unknown'] and device.state | float(0) < battery_threshold | int %}
+          {% set low_battery_count.value = low_battery_count.value + 1 %}
+        {% endif %}
+      {% endfor %}
+      {% set low_battery = low_battery_count.value > 0 %}
       {% set unavailable = states 
          | selectattr('state', 'in', ['unavailable', 'unknown'])
          | rejectattr('domain', 'in', ['group', 'automation', 'script', 'scene'])
@@ -78,16 +81,18 @@ action:
           <p>Report generated: {{ now().strftime('%B %d, %Y at %I:%M %p') }}</p>
           
           <h2 class="low-battery">⚠️ Low Battery Devices</h2>
-          {% set low_batteries = states.sensor 
+          {% set low_batteries = namespace(devices=[]) %}
+          {% for device in states.sensor 
              | selectattr('attributes.device_class', 'defined')
-             | selectattr('attributes.device_class', 'eq', 'battery')
-             | selectattr('state', 'is_number')
-             | selectattr('state', 'lt', battery_threshold | int)
-             | list %}
+             | selectattr('attributes.device_class', 'eq', 'battery') %}
+            {% if device.state not in ['unavailable', 'unknown'] and device.state | float(0) < battery_threshold | int %}
+              {% set low_batteries.devices = low_batteries.devices + [device] %}
+            {% endif %}
+          {% endfor %}
           
-          {% if low_batteries | count > 0 %}
+          {% if low_batteries.devices | count > 0 %}
             <ul>
-            {% for device in low_batteries | sort(attribute='state') %}
+            {% for device in low_batteries.devices | sort(attribute='state') %}
               <li>
                 {{ device.name }}
                 <span class="battery-level">{{ device.state }}%</span>
