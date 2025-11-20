@@ -8,10 +8,20 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
 
+from .api import async_register_websocket_handlers
+from .view import async_register_panel
+
 _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = "device_health_exclusions"
 PLATFORMS = ["sensor"]
+
+
+async def async_setup(hass: HomeAssistant, config: dict) -> bool:
+    """Set up the Device Health Exclusions Manager component."""
+    # Register WebSocket API
+    async_register_websocket_handlers(hass)
+    return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -19,6 +29,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = entry.data
 
+    # Register panel
+    await async_register_panel(hass)
+
+    # Forward to platforms
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     # Register update listener
