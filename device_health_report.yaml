@@ -36,11 +36,11 @@ blueprint:
 
     excluded_entities:
       name: Excluded Entities
-      description: Entities to exclude from the report (optional)
-      default: []
+      description: "Comma-separated list of entity IDs to exclude (e.g., sensor.battery_1, sensor.battery_2)"
+      default: ""
       selector:
-        entity:
-          multiple: true
+        text:
+          multiline: true
 
 trigger:
   - platform: time
@@ -50,7 +50,7 @@ condition:
   - condition: template
     value_template: >
       {% set send_always = not (send_only_if_issues | default(true)) %}
-      {% set excluded = excluded_entities | default([]) %}
+      {% set excluded = excluded_entities.split(',') | map('trim') | list if excluded_entities else [] %}
       {% set low_battery_count = namespace(value=0) %}
       {% for device in states.sensor
          | selectattr('attributes.device_class', 'defined')
@@ -60,11 +60,15 @@ condition:
         {% endif %}
       {% endfor %}
       {% set low_battery = low_battery_count.value > 0 %}
-      {% set unavailable = states
+      {% set unavailable_list = [] %}
+      {% for entity in states
          | selectattr('state', 'in', ['unavailable', 'unknown'])
-         | rejectattr('domain', 'in', ['group', 'automation', 'script', 'scene'])
-         | reject('in', excluded)
-         | list | count > 0 %}
+         | rejectattr('domain', 'in', ['group', 'automation', 'script', 'scene']) %}
+        {% if entity.entity_id not in excluded %}
+          {% set unavailable_list = unavailable_list + [entity] %}
+        {% endif %}
+      {% endfor %}
+      {% set unavailable = unavailable_list | count > 0 %}
       {{ send_always or low_battery or unavailable }}
 
 action:
@@ -93,7 +97,7 @@ action:
             <p>Report generated: {{ now().strftime('%B %d, %Y at %I:%M %p') }}</p>
 
             <h2 class="low-battery">⚠️ Low Battery Devices</h2>
-            {% set excluded = excluded_entities | default([]) %}
+            {% set excluded = excluded_entities.split(',') | map('trim') | list if excluded_entities else [] %}
             {% set low_batteries = namespace(devices=[]) %}
             {% for device in states.sensor
                | selectattr('attributes.device_class', 'defined')
@@ -117,11 +121,15 @@ action:
             {% endif %}
 
             <h2 class="unavailable">❌ Unavailable Devices</h2>
-            {% set unavailable = states
+            {% set unavailable_list = [] %}
+            {% for entity in states
                | selectattr('state', 'in', ['unavailable', 'unknown'])
-               | rejectattr('domain', 'in', ['group', 'automation', 'script', 'scene'])
-               | reject('in', excluded)
-               | list %}
+               | rejectattr('domain', 'in', ['group', 'automation', 'script', 'scene']) %}
+              {% if entity.entity_id not in excluded %}
+                {% set unavailable_list = unavailable_list + [entity] %}
+              {% endif %}
+            {% endfor %}
+            {% set unavailable = unavailable_list %}
 
             {% if unavailable | count > 0 %}
               <ul>
