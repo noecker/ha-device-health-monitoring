@@ -1,6 +1,6 @@
 {
   "name": "device-health-exclusions-frontend",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Frontend for Device Health Exclusions Manager",
   "scripts": {
     "build": "rollup -c",

@@ -1,5 +1,6 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 import { ProblemDevice, FilterMode } from '../types';
 
 @customElement('exclusions-table')
@@ -129,7 +130,9 @@ export class ExclusionsTable extends LitElement {
             </tr>
           </thead>
           <tbody>
-            ${filteredDevices.map(
+            ${repeat(
+              filteredDevices,
+              (device) => device.entity_id,
               (device) => html`
                 <tr>
                   <td class="checkbox-cell">

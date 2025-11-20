@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2025-11-20
+
+### Fixed
+- **Checkbox state alignment** when filtering devices
+  - Use Lit's `repeat` directive with unique keys (entity_id) for list rendering
+  - Prevents checkboxes from getting misaligned when devices are filtered out
+  - Fixes issue where next device's checkbox would appear checked after excluding a device
+
 ## [1.0.1] - 2025-11-20
 
 ### Fixed
