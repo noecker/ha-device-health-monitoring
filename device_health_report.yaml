@@ -84,14 +84,23 @@ condition:
       {% set low_battery = low_battery_count.value > 0 %}
       {% set unavailable_list = [] %}
       {% for entity in states
-         | selectattr('state', 'in', ['unavailable', 'unknown'])
+         | selectattr('state', 'eq', 'unavailable')
          | rejectattr('domain', 'in', ['group', 'automation', 'script', 'scene']) %}
         {% if entity.entity_id not in excluded %}
           {% set unavailable_list = unavailable_list + [entity] %}
         {% endif %}
       {% endfor %}
-      {% set unavailable = unavailable_list | count > 0 %}
-      {{ send_always or low_battery or unavailable }}
+      {% set has_unavailable = unavailable_list | count > 0 %}
+      {% set unknown_list = [] %}
+      {% for entity in states
+         | selectattr('state', 'eq', 'unknown')
+         | rejectattr('domain', 'in', ['group', 'automation', 'script', 'scene']) %}
+        {% if entity.entity_id not in excluded %}
+          {% set unknown_list = unknown_list + [entity] %}
+        {% endif %}
+      {% endfor %}
+      {% set has_unknown = unknown_list | count > 0 %}
+      {{ send_always or low_battery or has_unavailable or has_unknown }}
 
 action:
   - service: !input notify_service
@@ -145,7 +154,7 @@ action:
             <h2 class="unavailable">❌ Unavailable Devices</h2>
             {% set unavailable_list = [] %}
             {% for entity in states
-               | selectattr('state', 'in', ['unavailable', 'unknown'])
+               | selectattr('state', 'eq', 'unavailable')
                | rejectattr('domain', 'in', ['group', 'automation', 'script', 'scene']) %}
               {% if entity.entity_id not in excluded %}
                 {% set unavailable_list = unavailable_list + [entity] %}
@@ -161,6 +170,28 @@ action:
               </ul>
             {% else %}
               <p class="no-issues">✓ All devices are responding</p>
+            {% endif %}
+
+            <h2 style="color: #9e9e9e; border-bottom: 2px solid #ddd; padding-bottom: 10px;">❓ Unknown Status</h2>
+            <p style="color: #757575; font-size: 13px; margin-top: -5px;">These devices have not reported their state - this is often temporary.</p>
+            {% set unknown_list = [] %}
+            {% for entity in states
+               | selectattr('state', 'eq', 'unknown')
+               | rejectattr('domain', 'in', ['group', 'automation', 'script', 'scene']) %}
+              {% if entity.entity_id not in excluded %}
+                {% set unknown_list = unknown_list + [entity] %}
+              {% endif %}
+            {% endfor %}
+            {% set unknown_devices = unknown_list %}
+
+            {% if unknown_devices | count > 0 %}
+              <ul style="background: #fafafa;">
+              {% for device in unknown_devices | sort(attribute='name') %}
+                <li style="color: #757575;">{{ device.name }} ({{ device.entity_id }})</li>
+              {% endfor %}
+              </ul>
+            {% else %}
+              <p class="no-issues">✓ No devices with unknown status</p>
             {% endif %}
 
             <hr>

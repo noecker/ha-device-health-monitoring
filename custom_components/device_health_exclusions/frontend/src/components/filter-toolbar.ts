@@ -7,6 +7,7 @@ export class FilterToolbar extends LitElement {
   @property({ type: String }) filterMode: FilterMode = 'all';
   @property({ type: String }) searchQuery = '';
   @property({ type: Number }) batteryThreshold = 20;
+  @property({ type: Boolean }) hideUnknown = false;
 
   static styles = css`
     :host {
@@ -15,7 +16,8 @@ export class FilterToolbar extends LitElement {
 
     .toolbar {
       display: flex;
-      gap: 16px;
+      flex-wrap: wrap;
+      gap: 12px 16px;
       align-items: center;
       padding: 12px;
       background: var(--card-background-color);
@@ -24,6 +26,7 @@ export class FilterToolbar extends LitElement {
 
     .filter-buttons {
       display: flex;
+      flex-wrap: wrap;
       gap: 8px;
     }
 
@@ -50,6 +53,7 @@ export class FilterToolbar extends LitElement {
 
     .search-box {
       flex: 1;
+      min-width: 150px;
       padding: 8px 12px;
       border: 1px solid var(--divider-color);
       border-radius: 4px;
@@ -67,6 +71,7 @@ export class FilterToolbar extends LitElement {
     .threshold-input label {
       font-size: 14px;
       color: var(--secondary-text-color);
+      white-space: nowrap;
     }
 
     .threshold-input input {
@@ -77,6 +82,51 @@ export class FilterToolbar extends LitElement {
       background: var(--card-background-color);
       color: var(--primary-text-color);
       font-size: 14px;
+    }
+
+    .hide-unknown-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--secondary-text-color);
+      white-space: nowrap;
+    }
+
+    .hide-unknown-toggle input {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: var(--primary-color);
+    }
+
+    @media (max-width: 600px) {
+      .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .filter-buttons {
+        order: 1;
+        justify-content: flex-start;
+      }
+
+      .search-box {
+        order: 2;
+        width: 100%;
+        min-width: unset;
+      }
+
+      .threshold-input {
+        order: 3;
+        justify-content: space-between;
+      }
+
+      .hide-unknown-toggle {
+        order: 4;
+        justify-content: flex-start;
+      }
     }
   `;
 
@@ -122,6 +172,15 @@ export class FilterToolbar extends LitElement {
             @change=${this._handleThresholdChange}
           />
         </div>
+
+        <label class="hide-unknown-toggle">
+          <input
+            type="checkbox"
+            .checked=${this.hideUnknown}
+            @change=${this._handleHideUnknownChange}
+          />
+          Hide unknown
+        </label>
       </div>
     `;
   }
@@ -156,5 +215,15 @@ export class FilterToolbar extends LitElement {
         })
       );
     }
+  }
+
+  private _handleHideUnknownChange(e: Event) {
+    const input = e.target as HTMLInputElement;
+    this.hideUnknown = input.checked;
+    this.dispatchEvent(
+      new CustomEvent('hide-unknown-changed', {
+        detail: { hideUnknown: this.hideUnknown },
+      })
+    );
   }
 }
