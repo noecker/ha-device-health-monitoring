@@ -40,3 +40,13 @@ export async function toggleExclusion(
     entity_id: entityId,
   });
 }
+
+export async function toggleDeviceExclusion(
+  hass: HomeAssistant,
+  deviceId: string
+): Promise<{ success: boolean; is_excluded: boolean }> {
+  return await hass.callWS({
+    type: 'device_health_exclusions/toggle_device_exclusion',
+    device_id: deviceId,
+  });
+}
