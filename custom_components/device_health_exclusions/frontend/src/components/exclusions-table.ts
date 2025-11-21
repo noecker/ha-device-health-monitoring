@@ -8,6 +8,7 @@ export class ExclusionsTable extends LitElement {
   @property({ type: Array }) devices: ProblemDevice[] = [];
   @property({ type: String }) filterMode: FilterMode = 'all';
   @property({ type: String }) searchQuery = '';
+  @property({ type: Boolean }) hideUnknown = false;
 
   @state() private _expandedIntegrations: Set<string> = new Set();
   @state() private _expandedDevices: Set<string> = new Set();
@@ -166,6 +167,11 @@ export class ExclusionsTable extends LitElement {
     .status-unavailable {
       background: rgba(244, 67, 54, 0.2);
       color: var(--error-color, #f44336);
+    }
+
+    .status-unknown {
+      background: rgba(158, 158, 158, 0.2);
+      color: var(--secondary-text-color, #9e9e9e);
     }
 
     .empty-state {
@@ -383,10 +389,17 @@ export class ExclusionsTable extends LitElement {
   }
 
   private _renderStatusBadge(device: ProblemDevice) {
-    if (device.state === 'unavailable' || device.state === 'unknown') {
+    if (device.state === 'unavailable') {
       return html`
         <span class="status-badge status-unavailable">
-          ${device.state}
+          unavailable
+        </span>
+      `;
+    }
+    if (device.state === 'unknown') {
+      return html`
+        <span class="status-badge status-unknown">
+          unknown
         </span>
       `;
     }
@@ -483,6 +496,11 @@ export class ExclusionsTable extends LitElement {
       filtered = filtered.filter((d) => d.is_excluded);
     } else if (this.filterMode === 'not_excluded') {
       filtered = filtered.filter((d) => !d.is_excluded);
+    }
+
+    // Hide unknown status devices if toggle is on
+    if (this.hideUnknown) {
+      filtered = filtered.filter((d) => d.state !== 'unknown');
     }
 
     // Apply search query

@@ -26,6 +26,7 @@ export class DeviceHealthPanel extends LitElement {
   };
   @state() private _filterMode: FilterMode = 'all';
   @state() private _searchQuery = '';
+  @state() private _hideUnknown = false;
   @state() private _loading = true;
 
   static styles = panelStyles;
@@ -84,15 +85,18 @@ export class DeviceHealthPanel extends LitElement {
           .filterMode=${this._filterMode}
           .searchQuery=${this._searchQuery}
           .batteryThreshold=${this._settings.battery_threshold}
+          .hideUnknown=${this._hideUnknown}
           @filter-changed=${this._handleFilterChanged}
           @search-changed=${this._handleSearchChanged}
           @threshold-changed=${this._handleThresholdChanged}
+          @hide-unknown-changed=${this._handleHideUnknownChanged}
         ></filter-toolbar>
 
         <exclusions-table
           .devices=${this._devices}
           .filterMode=${this._filterMode}
           .searchQuery=${this._searchQuery}
+          .hideUnknown=${this._hideUnknown}
           @toggle-exclusion=${this._handleToggleExclusion}
           @toggle-device-exclusion=${this._handleToggleDeviceExclusion}
         ></exclusions-table>
@@ -190,6 +194,10 @@ export class DeviceHealthPanel extends LitElement {
 
   private _handleSearchChanged(e: CustomEvent) {
     this._searchQuery = e.detail.searchQuery;
+  }
+
+  private _handleHideUnknownChanged(e: CustomEvent) {
+    this._hideUnknown = e.detail.hideUnknown;
   }
 
   private async _handleThresholdChanged(e: CustomEvent) {
