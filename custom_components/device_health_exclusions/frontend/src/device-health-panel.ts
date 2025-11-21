@@ -6,6 +6,7 @@ import {
   fetchProblemDevices,
   fetchExclusions,
   toggleExclusion,
+  toggleDeviceExclusion,
   updateExclusions,
 } from './data/websocket';
 
@@ -17,6 +18,7 @@ export class DeviceHealthPanel extends LitElement {
   @state() private _devices: ProblemDevice[] = [];
   @state() private _settings: ExclusionSettings = {
     excluded_entities: [],
+    excluded_devices: [],
     battery_threshold: 20,
   };
   @state() private _filterMode: FilterMode = 'all';
@@ -77,6 +79,7 @@ export class DeviceHealthPanel extends LitElement {
         .filterMode=${this._filterMode}
         .searchQuery=${this._searchQuery}
         @toggle-exclusion=${this._handleToggleExclusion}
+        @toggle-device-exclusion=${this._handleToggleDeviceExclusion}
       ></exclusions-table>
     `;
   }
@@ -100,28 +103,59 @@ export class DeviceHealthPanel extends LitElement {
   private async _handleToggleExclusion(e: CustomEvent) {
     const { entityId } = e.detail;
     try {
-      await toggleExclusion(this.hass, entityId);
+      const result = await toggleExclusion(this.hass, entityId);
       // Update local state immediately for responsiveness
       this._devices = this._devices.map((d) =>
-        d.entity_id === entityId ? { ...d, is_excluded: !d.is_excluded } : d
+        d.entity_id === entityId
+          ? { ...d, is_excluded: result.is_excluded, is_entity_excluded: result.is_excluded }
+          : d
       );
       // Also update the settings to keep stats in sync
-      const device = this._devices.find(d => d.entity_id === entityId);
-      if (device) {
-        if (device.is_excluded) {
-          this._settings = {
-            ...this._settings,
-            excluded_entities: [...this._settings.excluded_entities, entityId]
-          };
-        } else {
-          this._settings = {
-            ...this._settings,
-            excluded_entities: this._settings.excluded_entities.filter(id => id !== entityId)
-          };
-        }
+      if (result.is_excluded) {
+        this._settings = {
+          ...this._settings,
+          excluded_entities: [...this._settings.excluded_entities, entityId]
+        };
+      } else {
+        this._settings = {
+          ...this._settings,
+          excluded_entities: this._settings.excluded_entities.filter(id => id !== entityId)
+        };
       }
     } catch (err) {
       console.error('Failed to toggle exclusion:', err);
+    }
+  }
+
+  private async _handleToggleDeviceExclusion(e: CustomEvent) {
+    const { deviceId } = e.detail;
+    try {
+      const result = await toggleDeviceExclusion(this.hass, deviceId);
+      // Update local state immediately for responsiveness
+      // Mark all entities belonging to this device as excluded/not excluded
+      this._devices = this._devices.map((d) =>
+        d.device_id === deviceId
+          ? {
+              ...d,
+              is_device_excluded: result.is_excluded,
+              is_excluded: result.is_excluded || d.is_entity_excluded,
+            }
+          : d
+      );
+      // Also update the settings to keep stats in sync
+      if (result.is_excluded) {
+        this._settings = {
+          ...this._settings,
+          excluded_devices: [...this._settings.excluded_devices, deviceId]
+        };
+      } else {
+        this._settings = {
+          ...this._settings,
+          excluded_devices: this._settings.excluded_devices.filter(id => id !== deviceId)
+        };
+      }
+    } catch (err) {
+      console.error('Failed to toggle device exclusion:', err);
     }
   }
 

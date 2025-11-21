@@ -343,7 +343,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
   "integration_type": "helper",
   "iot_class": "local_push",
   "requirements": [],
-  "version": "2.0.0",
+  "version": "1.1.0",
   "dependencies": ["frontend"],
   "after_dependencies": ["http"]
 }
@@ -366,7 +366,7 @@ cd frontend
 ```json
 {
   "name": "device-health-exclusions-frontend",
-  "version": "2.0.0",
+  "version": "1.1.0",
   "description": "Frontend for Device Health Exclusions Manager",
   "scripts": {
     "build": "rollup -c",
@@ -1361,36 +1361,7 @@ Add sections about:
 
 ### Step 5.2: Update CHANGELOG
 
-```markdown
-## [2.0.0] - 2025-XX-XX
-
-### Added
-- Full-page custom panel interface
-- Table view for device management
-- Real-time exclusion toggling
-- Advanced filtering (All/Not Excluded/Excluded)
-- Search functionality
-- Visual statistics dashboard
-- Battery threshold adjustment in UI
-
-### Changed
-- Config flow still available for initial setup
-- Panel now the primary interface for managing exclusions
-
-### Technical
-- Added WebSocket API for real-time updates
-- Built with Lit web components
-- TypeScript frontend codebase
-```
-
-### Step 5.3: Create Migration Guide
-
-**File:** `MIGRATION_V2.md`
-
-Document:
-- Changes from v1.0.0 to v2.0.0
-- How to access the new panel
-- Backwards compatibility notes
+Update the CHANGELOG.md with the new version's changes, following Keep a Changelog format.
 
 ---
 

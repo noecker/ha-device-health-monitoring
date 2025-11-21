@@ -44,12 +44,15 @@ class DeviceHealthExclusionsSensor(SensorEntity):
     @property
     def extra_state_attributes(self) -> dict[str, any]:
         """Return the state attributes."""
-        excluded = self._config_entry.data.get("excluded_entities", [])
+        excluded_entities = self._config_entry.data.get("excluded_entities", [])
+        excluded_devices = self._config_entry.data.get("excluded_devices", [])
         battery_threshold = self._config_entry.data.get("battery_threshold", 20)
 
         return {
-            "excluded_entities": excluded,
-            "excluded_count": len(excluded),
+            "excluded_entities": excluded_entities,
+            "excluded_devices": excluded_devices,
+            "excluded_count": len(excluded_entities),
+            "excluded_device_count": len(excluded_devices),
             "battery_threshold": battery_threshold,
         }
 

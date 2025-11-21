@@ -3,7 +3,7 @@
 ## Project Overview
 
 **Name:** Device Health Exclusions Manager for Home Assistant
-**Version:** 2.0.0 (Current: 1.0.0 in manifest)
+**Version:** 1.1.0
 **Type:** Home Assistant Custom Integration + Blueprint
 **License:** MIT
 **Repository:** https://github.com/noecker/ha-device-health-monitoring
@@ -18,7 +18,7 @@ A complete solution for monitoring device health in Home Assistant with email re
 ### Components
 
 #### 1. Custom Integration (`custom_components/device_health_exclusions/`)
-A Home Assistant custom integration (v2.0.0) that provides:
+A Home Assistant custom integration that provides:
 - **Custom Panel Interface** - Full-page UI in HA sidebar for exclusion management
 - **WebSocket API** - Real-time communication with frontend
 - **Sensor Entity** - Exposes excluded device list for blueprint consumption
@@ -117,7 +117,7 @@ Home Assistant automation blueprint that:
 
 ## Key Features
 
-### Custom Panel (v2.0.0)
+### Custom Panel
 - **Access:** Settings → Device Health (sidebar) or `/device-health-exclusions`
 - **Real-time Updates:** WebSocket-based, no page reload needed
 - **Smart Filtering:** Only shows devices with problems (low battery or unavailable)
@@ -170,7 +170,6 @@ Home Assistant automation blueprint that:
 ├── device_health_report.yaml          # Blueprint
 ├── README.md                          # Main documentation
 ├── INSTALLATION.md                    # Install guide
-├── MIGRATION_V2.md                    # v1→v2 upgrade
 ├── CHANGELOG.md                       # Version history
 ├── CUSTOM_FRONTEND_SPEC.md            # Technical frontend docs
 ├── GETTING_STARTED_AS_MAINTAINER.md   # Maintainer guide
@@ -269,29 +268,23 @@ Home Assistant automation blueprint that:
 
 ## Version History
 
-### v2.0.0 (2025-11-20) - Current Development
-**Major Features:**
+### v1.1.0 (2025-11-21) - Current
+**New Features:**
+- Hierarchical device grouping by integration and device
+- Device-level exclusions - exclude entire devices at once
+- Enhanced search including integration and device name
+
+### v1.0.0 (2025-11-20) - Initial Release
 - Full-page custom panel interface
 - WebSocket API for real-time updates
 - Modern Lit-based TypeScript frontend
 - Table view with filtering and search
 - Statistics dashboard
 - In-panel battery threshold adjustment
-
-**Technical:**
-- Panel registration in HA sidebar
-- Static asset serving via HTTP component
-- Frontend dependencies added to manifest
-- Config flow still available for initial setup
-
-### v1.0.0 (2024-11-20) - Initial Release
 - Custom integration with config flow
-- Multi-select device picker
 - Sensor entity
-- Options flow
 - Device Health Report blueprint
 - HTML email reports
-- Dual exclusion modes
 - HACS compatibility
 
 ---
@@ -433,12 +426,6 @@ npm run build
 ## Git Information
 
 **Current Branch:** main
-**Recent Commits:**
-- dfb3602 - chore: Set initial version to 1.0.0
-- 3862d12 - Merge pull request #1
-- 60c2838 - chore: Add package-lock.json
-- d6e1f1d - docs: Phase 5 - Update documentation for v2.0.0
-- 49834f9 - feat: Phase 4 - Build and deploy frontend assets
 
 **Status:** Clean working directory
 
@@ -452,5 +439,5 @@ npm run build
 
 ---
 
-*Context file generated: 2025-11-20*
-*Project Version: 2.0.0 (in development)*
+*Context file generated: 2025-11-21*
+*Project Version: 1.1.0*
