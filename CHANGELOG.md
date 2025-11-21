@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2025-11-21
+
+### Added
+- **Hierarchical device grouping** - Entities are now grouped by integration, then by device
+- **Device-level exclusions** - Exclude entire devices with one checkbox instead of individual entities
+- **Integration display** - See which integration each device belongs to
+- **Device metadata** - Shows manufacturer and model information for devices
+- **Enhanced search** - Search now includes device name and integration name
+- **New WebSocket command** `toggle_device_exclusion` for device-level toggling
+- **Sensor attributes** for excluded devices (`excluded_devices`, `excluded_device_count`)
+
+### Changed
+- **Table view redesigned** with collapsible integration and device sections
+- **Entity rows** now show when excluded via device vs directly excluded
+- **Statistics** show per-integration and per-device exclusion counts
+
+### Technical
+- Added device registry and entity registry lookups in API
+- Extended `ProblemDevice` interface with device/integration fields
+- Added `DeviceGroup` and `IntegrationGroup` types for hierarchical display
+
 ## [1.0.2] - 2025-11-20
 
 ### Fixed
@@ -23,7 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Panel now keeps scroll position when checking/unchecking devices
   - Statistics update immediately without full page refresh
 
-## [2.0.0] - 2025-11-20
+## [1.0.0] - 2025-11-20
 
 ### Added
 - **Full-page custom panel interface** for Device Health Exclusions Manager
@@ -43,36 +64,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Direct access via Settings → Device Health
   - Full-page experience (not modal-based)
   - Persistent navigation item
-
-### Changed
-- **Config flow still available** for initial setup
-- **Panel is now primary interface** for managing exclusions
-- **Version bumped to 2.0.0** in manifest
-- **Added frontend dependencies** to manifest (frontend, http)
-
-### Technical
-- Lit 3.1.0 web components
-- TypeScript with ES2020 target
-- Rollup bundler with terser minification
-- WebSocket-based real-time updates
-- Static asset serving via Home Assistant HTTP component
-- Source maps included for debugging
-
-### Migration Notes
-- See [MIGRATION_V2.md](MIGRATION_V2.md) for upgrade instructions
-- Existing v1.0.0 installations will preserve settings
-- No breaking changes to blueprint or sensor
-
-## [1.0.0] - 2024-11-20
-
-### Added
-- Initial release of Device Health Monitoring system
-- Custom integration: Device Health Exclusions Manager
-  - Config flow UI with multi-select device picker
-  - Visual interface showing only problem devices
-  - Sensor entity exposing excluded device list
-  - Options flow for updating settings
-  - Real-time updates without restart
+- Custom integration with config flow
+- Multi-select device picker
+- Sensor entity exposing excluded device list
+- Options flow for updating settings
 - Device Health Report blueprint
   - HTML-formatted email reports
   - Battery level monitoring with configurable threshold
@@ -84,29 +79,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - HACS compatibility
   - Automated install scripts (Bash and Python)
   - Manual installation support
-- Comprehensive documentation
-  - Installation guides
-  - Quick start guide
-  - Distribution documentation
-  - Maintainer guide
-- GitHub Actions workflow for automated releases
-- Package creator tool for distribution
-
-### Features
-- Smart device filtering (shows only devices with issues)
-- Multi-select checkbox interface for exclusions
-- Configurable battery threshold (5-50%)
-- Excludes irrelevant domains (groups, automations, etc.)
-- Styled HTML email reports
-- Comma-separated list fallback for exclusions
 
 ### Technical
+- Lit 3.1.0 web components
+- TypeScript with ES2020 target
+- Rollup bundler with terser minification
+- WebSocket-based real-time updates
+- Static asset serving via Home Assistant HTTP component
+- Source maps included for debugging
 - Home Assistant 2023.1.0+ compatibility
 - Local push integration (no external dependencies)
 - Helper integration type
 - Config entry based setup
-- Proper async/await implementation
-- Full translation support
 
-[Unreleased]: https://github.com/noecker/ha-device-health-monitoring/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/noecker/ha-device-health-monitoring/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/noecker/ha-device-health-monitoring/compare/v1.0.2...v1.1.0
+[1.0.2]: https://github.com/noecker/ha-device-health-monitoring/compare/v1.0.1...v1.0.2
+[1.0.1]: https://github.com/noecker/ha-device-health-monitoring/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/noecker/ha-device-health-monitoring/releases/tag/v1.0.0

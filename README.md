@@ -2,10 +2,11 @@
 
 A complete solution for monitoring device health in Home Assistant with email reports and advanced exclusion management.
 
-## ✨ New in v2.0.0: Full-Page Custom Panel
+## Features
 
-Version 2.0.0 introduces a **modern full-page panel interface** accessible directly from the Home Assistant sidebar!
-
+- **Full-page custom panel** accessible from the Home Assistant sidebar
+- **Hierarchical grouping** by integration and device
+- **Device-level exclusions** - exclude entire devices with one click
 - **Real-time device management** with instant updates
 - **Table view** with filtering, search, and statistics
 - **One-click exclusion toggling** (no page reload needed)
@@ -21,12 +22,13 @@ An automation blueprint that sends daily email reports of:
 - Unavailable/offline devices
 - Beautiful HTML-formatted emails
 
-### 2. Device Health Exclusions Manager (Custom Integration) - v2.0.0
+### 2. Device Health Exclusions Manager (Custom Integration)
 A custom integration with both **custom panel** and **config flow** interfaces:
 - **Full-page panel** for day-to-day exclusion management
-- **Table view** with real-time updates
+- **Hierarchical view** grouped by integration and device
+- **Device-level exclusions** - exclude all entities from a device at once
 - **Advanced filtering** (All/Not Excluded/Excluded)
-- **Search** by device name or entity ID
+- **Search** by device name, entity ID, or integration
 - **Statistics dashboard** with visual indicators
 - **Battery threshold adjustment** in UI
 - **Config flow** still available for initial setup
@@ -39,38 +41,39 @@ A custom integration with both **custom panel** and **config flow** interfaces:
 3. Configure notification service and settings
 4. Add exclusions as comma-separated entity IDs
 
-### Advanced Setup (Integration with Custom Panel) - v2.0.0
+### Advanced Setup (Integration with Custom Panel)
 1. Install the custom integration (see [INSTALLATION.md](INSTALLATION.md))
 2. Add "Device Health Exclusions Manager" integration via config flow
 3. Access the panel: **Settings → Device Health**
 4. Manage exclusions using the full-page interface
 5. Update blueprint to use "Integration Mode"
 
-## Features
+## Feature Details
 
 ### Device Health Report
-- 📧 HTML email reports with styling
-- 🔋 Battery level monitoring with configurable threshold
-- ❌ Unavailable device detection
-- 📅 Scheduled daily reports
-- ⚙️ Optional: only send if issues found
+- HTML email reports with styling
+- Battery level monitoring with configurable threshold
+- Unavailable device detection
+- Scheduled daily reports
+- Optional: only send if issues found
 
-### Exclusions Manager - v2.0.0
-- 🖥️ **Full-page custom panel** in sidebar
-- 📊 **Statistics dashboard** with problem/excluded/reported counts
-- 🔍 **Advanced filtering** (All/Not Excluded/Excluded)
-- 🔎 **Search functionality** by name or entity ID
-- ☑️ **Table view** with checkbox interface
-- ⚡ **Real-time toggling** (instant updates, no reload)
-- 🎯 Shows ONLY problem devices
-- 📈 Battery threshold adjustment in UI
-- 📊 Sensor entity with exclusion data
-- 🔄 Config flow for initial setup
+### Exclusions Manager
+- **Full-page custom panel** in sidebar
+- **Hierarchical grouping** by integration, then device, then entities
+- **Device-level exclusions** - one checkbox excludes all entities from a device
+- **Statistics dashboard** with problem/excluded/reported counts
+- **Advanced filtering** (All/Not Excluded/Excluded)
+- **Search functionality** by name, entity ID, or integration
+- **Table view** with checkbox interface
+- **Real-time toggling** (instant updates, no reload)
+- Shows ONLY problem devices
+- Battery threshold adjustment in UI
+- Sensor entity with exclusion data
+- Config flow for initial setup
 
 ## Documentation
 
 - [Installation Guide](INSTALLATION.md) - Detailed setup instructions
-- [Migration Guide v2.0.0](MIGRATION_V2.md) - Upgrade from v1.0.0
 - [Custom Frontend Spec](CUSTOM_FRONTEND_SPEC.md) - Technical implementation details
 - [Integration README](custom_components/device_health_exclusions/README.md) - Technical details
 - [Changelog](CHANGELOG.md) - Version history
@@ -80,7 +83,7 @@ A custom integration with both **custom panel** and **config flow** interfaces:
 ```
 ├── device_health_report.yaml          # Blueprint for automation
 ├── custom_components/
-│   └── device_health_exclusions/      # Custom integration v2.0.0
+│   └── device_health_exclusions/      # Custom integration
 │       ├── __init__.py                # Integration setup
 │       ├── api.py                     # WebSocket API handlers
 │       ├── view.py                    # Panel registration
@@ -101,7 +104,6 @@ A custom integration with both **custom panel** and **config flow** interfaces:
 │       └── www/                       # Built frontend assets
 │           └── device-health-panel.js
 ├── INSTALLATION.md                    # Setup guide
-├── MIGRATION_V2.md                    # v1.0.0 → v2.0.0 upgrade guide
 ├── CHANGELOG.md                       # Version history
 └── README.md                          # This file
 ```

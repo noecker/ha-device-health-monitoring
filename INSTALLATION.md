@@ -2,17 +2,14 @@
 
 Complete installation guide for the Device Health Monitoring system.
 
-## ✨ Version 2.0.0 - Custom Panel Interface
+## Features
 
-This guide covers installation of **v2.0.0** which includes a modern **full-page custom panel**!
-
-### What's New
 - **Full-page panel** accessible from Home Assistant sidebar (Settings → Device Health)
+- **Hierarchical grouping** by integration and device
+- **Device-level exclusions** - exclude entire devices with one click
 - **Real-time device management** with instant updates
 - **Table view** with filtering, search, and statistics
 - **WebSocket API** for seamless communication
-
-Upgrading from v1.0.0? See [MIGRATION_V2.md](MIGRATION_V2.md)
 
 ## What This Does
 
@@ -203,7 +200,7 @@ python3 install.py
 3. **Submit**
    - A sensor is created: `sensor.device_health_exclusions_excluded_entities`
 
-### Step 2b: Using the Custom Panel (v2.0.0)
+### Step 2b: Using the Custom Panel
 
 **After initial setup, use the custom panel for managing exclusions:**
 
@@ -361,8 +358,8 @@ Now:
 - Update exclusions via the panel (real-time updates!)
 - Customize the email template if desired
 
-### Using v2.0.0 Custom Panel
+### Using the Custom Panel
 - Access via: **Settings → Device Health** (sidebar)
 - Direct URL: `/device-health-exclusions`
-- Features: Table view, filtering, search, statistics
+- Features: Hierarchical grouping, device-level exclusions, filtering, search, statistics
 - Real-time: No reload needed for changes
