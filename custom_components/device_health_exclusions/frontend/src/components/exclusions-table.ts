@@ -11,6 +11,7 @@ export class ExclusionsTable extends LitElement {
 
   @state() private _expandedIntegrations: Set<string> = new Set();
   @state() private _expandedDevices: Set<string> = new Set();
+  private _initialExpansionDone = false;
 
   static styles = css`
     :host {
@@ -223,13 +224,14 @@ export class ExclusionsTable extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    // Expand all by default
-    this._expandAllGroups();
+    this._initialExpansionDone = false;
   }
 
   updated(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('devices')) {
+    // Only expand all groups on initial load, not on every device update
+    if (changedProperties.has('devices') && !this._initialExpansionDone && this.devices.length > 0) {
       this._expandAllGroups();
+      this._initialExpansionDone = true;
     }
   }
 
