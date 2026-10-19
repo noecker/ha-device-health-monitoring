@@ -19,6 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`health.py`** - The detection rules as a Home Assistant-free module, with unit
   tests under `tests/` (`python3 -m unittest discover -s tests`).
 
+### Changed
+- **Docs** - `INSTALLATION.md` gains an end-to-end section for wiring the integration
+  into Majordomo across both systems, with a verification checklist; `MAJORDOMO.md` and
+  `QUICKSTART.md` link to it.
+
 ## [1.1.0] - 2025-11-21
 
 ### Added
