@@ -21,7 +21,7 @@ A complete solution for monitoring device health in Home Assistant with email re
 A Home Assistant custom integration that provides:
 - **Custom Panel Interface** - Full-page UI in HA sidebar for exclusion management
 - **WebSocket API** - Real-time communication with frontend
-- **Sensor Entity** - Exposes excluded device list for blueprint consumption
+- **Sensor Entities** - One exposes the exclusion list for the blueprint; a second, **Problem Count**, exposes the number of problem entities after exclusions with per-class attributes (`low_battery`, `unavailable`, `unknown`)
 - **Config Flow** - Initial setup and configuration interface
 
 **Key Files:**
@@ -29,7 +29,8 @@ A Home Assistant custom integration that provides:
 - [api.py](custom_components/device_health_exclusions/api.py) - WebSocket API handlers for device management
 - [view.py](custom_components/device_health_exclusions/view.py) - Panel registration (sidebar item)
 - [frontend.py](custom_components/device_health_exclusions/frontend.py) - Static asset serving
-- [sensor.py](custom_components/device_health_exclusions/sensor.py) - Sensor entity exposing exclusion list
+- [health.py](custom_components/device_health_exclusions/health.py) - Detection rules as a pure module (no Home Assistant imports; unit-tested under `tests/`)
+- [sensor.py](custom_components/device_health_exclusions/sensor.py) - Sensor entities: exclusion list and Problem Count (polled every 5 minutes)
 - [config_flow.py](custom_components/device_health_exclusions/config_flow.py) - Initial setup flow and options flow
 - [manifest.json](custom_components/device_health_exclusions/manifest.json) - Integration metadata
 
@@ -67,6 +68,19 @@ Home Assistant automation blueprint that:
   - **Integration Mode**: Reads from sensor entity
   - **Manual Mode**: Comma-separated list in blueprint config
 - Optional "send only if issues found" mode
+
+#### 4. Majordomo Blueprint (`device_health_majordomo.yaml`)
+Home Assistant automation blueprint that posts the Problem Count sensor's per-class
+counts to a [Majordomo](https://github.com/noecker/majordomo) operations queue:
+- Up to three `condition` items under one source (`device-health:low-battery`,
+  `device-health:unavailable`, `device-health:unknown`), count in the title and `meta`
+- Posted with `/api/v1/sync`, so a class that reaches zero is omitted and closes itself
+- Triggered on a change of the count sensor that holds for a settle delay (default 15
+  minutes), plus a daily re-assert
+- Severity per class (defaults `low` / `high` / `info`); never posts while the sensor
+  is unavailable
+- The HTTP call is a user-defined `rest_command` holding the Majordomo URL and token;
+  see [MAJORDOMO.md](MAJORDOMO.md)
 
 ---
 
@@ -151,7 +165,8 @@ Home Assistant automation blueprint that:
 │       ├── view.py                    # Panel registration
 │       ├── frontend.py                # Static asset serving
 │       ├── config_flow.py             # Setup flows
-│       ├── sensor.py                  # Sensor entity
+│       ├── health.py                  # Detection rules (no HA imports)
+│       ├── sensor.py                  # Sensor entities
 │       ├── manifest.json              # Integration metadata
 │       ├── strings.json               # UI strings
 │       ├── translations/              # i18n
@@ -167,9 +182,12 @@ Home Assistant automation blueprint that:
 │       │   └── rollup.config.js
 │       └── www/                       # Built assets
 │           └── device-health-panel.js
-├── device_health_report.yaml          # Blueprint
+├── device_health_report.yaml          # Blueprint: daily email report
+├── device_health_majordomo.yaml       # Blueprint: counts into Majordomo
+├── tests/                             # Unit tests for health.py
 ├── README.md                          # Main documentation
 ├── INSTALLATION.md                    # Install guide
+├── MAJORDOMO.md                       # Feeding a Majordomo queue
 ├── CHANGELOG.md                       # Version history
 ├── CUSTOM_FRONTEND_SPEC.md            # Technical frontend docs
 ├── GETTING_STARTED_AS_MAINTAINER.md   # Maintainer guide
@@ -261,8 +279,25 @@ Home Assistant automation blueprint that:
 
 **Attributes:**
 - `excluded_entities`: list[str]
+- `excluded_devices`: list[str]
 - `excluded_count`: int
+- `excluded_device_count`: int
 - `battery_threshold`: int
+
+### Problem Count Sensor
+**Name:** Problem Count (unique id `<entry_id>_problem_count`)
+
+**State:** int, number of problem entities after entity and device exclusions
+
+**Attributes:**
+- `low_battery`: int
+- `unavailable`: int
+- `unknown`: int
+- `battery_threshold`: int
+
+Recomputed every 5 minutes (`SCAN_INTERVAL` in `sensor.py`) and on every config entry
+reload. Rules in `health.py` (`classify_problems`), tested by
+`python3 -m unittest discover -s tests`.
 
 ---
 

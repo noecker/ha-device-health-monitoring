@@ -1,0 +1,156 @@
+blueprint:
+  name: Device Health → Majordomo
+  description: >
+    Post the problem counts from the Device Health Exclusions Manager to a Majordomo
+    operations queue as up to three condition items: low battery, unavailable and
+    unknown. The device list itself stays in Home Assistant; each item carries only a
+    count and links back to the Device Health panel. Needs a rest_command that POSTs its
+    `payload` variable to Majordomo's /api/v1/sync; see MAJORDOMO.md in the repository.
+  domain: automation
+  source_url: https://github.com/noecker/ha-device-health-monitoring/blob/main/device_health_majordomo.yaml
+  input:
+    count_sensor:
+      name: Problem count sensor
+      description: The "Problem Count" sensor created by the Device Health Exclusions Manager integration.
+      selector:
+        entity:
+          filter:
+            - integration: device_health_exclusions
+              domain: sensor
+
+    sync_service:
+      name: Sync service
+      description: >
+        The rest_command that POSTs to Majordomo's /api/v1/sync. It receives one
+        variable, `payload`, holding the request body (see MAJORDOMO.md).
+      default: rest_command.majordomo_sync
+      selector:
+        text:
+
+    source:
+      name: Majordomo source
+      description: The `source` the items are filed under. Lowercase letters, digits, `_`, `.` and `-` only.
+      default: home-assistant
+      selector:
+        text:
+
+    panel_url:
+      name: Panel URL
+      description: >
+        Absolute URL of the Device Health panel, used as every item's link
+        (for example https://ha.example.net/device-health-exclusions). Leave empty for no link.
+      default: ""
+      selector:
+        text:
+
+    low_battery_severity:
+      name: Low battery severity
+      description: Majordomo severity for the low-battery item. `low` keeps it in the digest only.
+      default: low
+      selector:
+        select:
+          options: [urgent, high, medium, low, info]
+
+    unavailable_severity:
+      name: Unavailable severity
+      description: Majordomo severity for the unavailable item. `high` pushes once when the count leaves zero.
+      default: high
+      selector:
+        select:
+          options: [urgent, high, medium, low, info]
+
+    unknown_severity:
+      name: Unknown severity
+      description: Majordomo severity for the unknown-state item. `info` keeps it in the digest only.
+      default: info
+      selector:
+        select:
+          options: [urgent, high, medium, low, info]
+
+    settle_delay:
+      name: Settle delay
+      description: >
+        How long a change in the count must hold before it is posted, so a device that
+        drops off for a minute never reaches the queue.
+      default:
+        minutes: 15
+      selector:
+        duration:
+
+    daily_time:
+      name: Daily re-assert
+      description: >
+        Time of day to post the current counts regardless of change, so the items'
+        last-seen time on the queue stays fresh.
+      default: "08:00:00"
+      selector:
+        time:
+
+mode: restart
+
+trigger:
+  - platform: state
+    entity_id: !input count_sensor
+    for: !input settle_delay
+  - platform: time
+    at: !input daily_time
+
+variables:
+  count_sensor: !input count_sensor
+  source: !input source
+  panel_url: !input panel_url
+  low_battery_severity: !input low_battery_severity
+  unavailable_severity: !input unavailable_severity
+  unknown_severity: !input unknown_severity
+  battery_threshold: "{{ state_attr(count_sensor, 'battery_threshold') | int(20) }}"
+  low_battery: "{{ state_attr(count_sensor, 'low_battery') | int(0) }}"
+  unavailable: "{{ state_attr(count_sensor, 'unavailable') | int(0) }}"
+  unknown: "{{ state_attr(count_sensor, 'unknown') | int(0) }}"
+  items: >-
+    {% set ns = namespace(items=[]) %}
+    {% if low_battery > 0 %}
+      {% set ns.items = ns.items + [{
+        'key': 'device-health:low-battery',
+        'kind': 'condition',
+        'severity': low_battery_severity,
+        'title': low_battery ~ (' device' if low_battery == 1 else ' devices')
+                 ~ ' with low battery (below ' ~ battery_threshold ~ '%)',
+        'url': panel_url,
+        'meta': {'count': low_battery, 'battery_threshold': battery_threshold}
+      }] %}
+    {% endif %}
+    {% if unavailable > 0 %}
+      {% set ns.items = ns.items + [{
+        'key': 'device-health:unavailable',
+        'kind': 'condition',
+        'severity': unavailable_severity,
+        'title': unavailable ~ (' device' if unavailable == 1 else ' devices') ~ ' unavailable',
+        'url': panel_url,
+        'meta': {'count': unavailable}
+      }] %}
+    {% endif %}
+    {% if unknown > 0 %}
+      {% set ns.items = ns.items + [{
+        'key': 'device-health:unknown',
+        'kind': 'condition',
+        'severity': unknown_severity,
+        'title': unknown ~ (' device' if unknown == 1 else ' devices') ~ ' with unknown state',
+        'url': panel_url,
+        'meta': {'count': unknown}
+      }] %}
+    {% endif %}
+    {{ ns.items }}
+
+condition:
+  # Never post while the sensor itself is missing or not ready: an empty items list
+  # would close every device-health item on the queue as if all were healthy.
+  - condition: template
+    value_template: "{{ states(count_sensor) not in ['unavailable', 'unknown', 'none'] }}"
+
+action:
+  - service: !input sync_service
+    data:
+      payload:
+        source: "{{ source }}"
+        prefix: "device-health:"
+        items: "{{ items }}"
