@@ -47,12 +47,19 @@ This integration is designed to work with the **Device Health Report** blueprint
 
 ## Sensor Data
 
-The created sensor exposes:
+The exclusions sensor exposes:
 - **State**: Comma-separated list of excluded entities
 - **Attributes**:
   - `excluded_entities`: List format
   - `excluded_count`: Number of excluded devices
   - `battery_threshold`: Your configured threshold
+
+The **Problem Count** sensor exposes:
+- **State**: Number of problem entities after all exclusions
+- **Attributes**: `low_battery`, `unavailable`, `unknown`, `battery_threshold`
+
+Feed the counts to a [Majordomo](https://github.com/noecker/majordomo) queue with the
+`device_health_majordomo.yaml` blueprint; see MAJORDOMO.md in the repository.
 
 ## Updating Exclusions
 

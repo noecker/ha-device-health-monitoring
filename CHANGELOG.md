@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Problem Count sensor** - A second sensor whose state is the number of problem
+  entities after entity and device exclusions, with `low_battery`, `unavailable`,
+  `unknown` and `battery_threshold` attributes. Recomputed every five minutes and on
+  every exclusion change.
+- **Majordomo blueprint** (`device_health_majordomo.yaml`) - Posts the counts to a
+  [Majordomo](https://github.com/noecker/majordomo) queue as up to three condition
+  items via `/api/v1/sync`, with a settle delay and a daily re-assert. See
+  [MAJORDOMO.md](MAJORDOMO.md).
+- **`health.py`** - The detection rules as a Home Assistant-free module, with unit
+  tests under `tests/` (`python3 -m unittest discover -s tests`).
+
 ## [1.1.0] - 2025-11-21
 
 ### Added

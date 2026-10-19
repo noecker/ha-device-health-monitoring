@@ -34,8 +34,24 @@ Creates: `sensor.device_health_exclusions_excluded_entities`
 
 **Attributes**:
 - `excluded_entities`: List of excluded entity IDs
+- `excluded_devices`: List of excluded device IDs
 - `excluded_count`: Number of excluded entities
+- `excluded_device_count`: Number of excluded devices
 - `battery_threshold`: Current battery threshold setting
+
+Also creates a **Problem Count** sensor:
+
+**State**: Number of problem entities after entity and device exclusions
+
+**Attributes**:
+- `low_battery`: Battery sensors below the threshold
+- `unavailable`: Entities in state `unavailable` (outside the excluded domains)
+- `unknown`: Entities in state `unknown` (outside the excluded domains)
+- `battery_threshold`: The threshold the counts were computed with
+
+Recomputed every five minutes (`SCAN_INTERVAL` in `sensor.py`) and immediately on any
+exclusion change, because the config entry reloads. The rules live in `health.py`, which
+imports nothing from Home Assistant so they can be tested with plain objects.
 
 ### Config Flow Steps
 

@@ -11,6 +11,8 @@ A complete solution for monitoring device health in Home Assistant with email re
 - **Table view** with filtering, search, and statistics
 - **One-click exclusion toggling** (no page reload needed)
 - **Visual dashboard** showing problem/excluded/reported counts
+- **Problem Count sensor** with per-class counts for automations and dashboards
+- **Majordomo feed** - post the counts to a self-hosted operations queue ([MAJORDOMO.md](MAJORDOMO.md))
 
 Access via: **Settings → Device Health** (heart icon in sidebar)
 
@@ -32,6 +34,14 @@ A custom integration with both **custom panel** and **config flow** interfaces:
 - **Statistics dashboard** with visual indicators
 - **Battery threshold adjustment** in UI
 - **Config flow** still available for initial setup
+- **Two sensors**: the exclusion list, and a **Problem Count** whose attributes carry
+  the low-battery / unavailable / unknown counts after all exclusions
+
+### 3. Device Health → Majordomo Blueprint
+An automation blueprint that posts the problem counts to a
+[Majordomo](https://github.com/noecker/majordomo) operations queue as up to three
+condition items, each linking back to the panel. The device list stays in Home
+Assistant. See [MAJORDOMO.md](MAJORDOMO.md).
 
 ## Quick Start
 
@@ -69,11 +79,19 @@ A custom integration with both **custom panel** and **config flow** interfaces:
 - Shows ONLY problem devices
 - Battery threshold adjustment in UI
 - Sensor entity with exclusion data
+- Problem Count sensor (total after exclusions; attributes per class)
 - Config flow for initial setup
+
+### Majordomo Feed
+- Counts only: three condition items at most, never a device list
+- Posted with `/api/v1/sync`, so a class that reaches zero closes itself
+- Settle delay against flapping devices, daily re-assert for freshness
+- Severity per class; `high` pushes once when a count leaves zero
 
 ## Documentation
 
 - [Installation Guide](INSTALLATION.md) - Detailed setup instructions
+- [Majordomo Feed](MAJORDOMO.md) - Posting the counts to a Majordomo queue
 - [Custom Frontend Spec](CUSTOM_FRONTEND_SPEC.md) - Technical implementation details
 - [Integration README](custom_components/device_health_exclusions/README.md) - Technical details
 - [Changelog](CHANGELOG.md) - Version history
@@ -81,7 +99,8 @@ A custom integration with both **custom panel** and **config flow** interfaces:
 ## Files
 
 ```
-├── device_health_report.yaml          # Blueprint for automation
+├── device_health_report.yaml          # Blueprint: daily email report
+├── device_health_majordomo.yaml       # Blueprint: counts into Majordomo
 ├── custom_components/
 │   └── device_health_exclusions/      # Custom integration
 │       ├── __init__.py                # Integration setup
@@ -89,7 +108,8 @@ A custom integration with both **custom panel** and **config flow** interfaces:
 │       ├── view.py                    # Panel registration
 │       ├── frontend.py                # Static asset serving
 │       ├── config_flow.py             # Config/options flow
-│       ├── sensor.py                  # Sensor entity
+│       ├── health.py                  # Detection rules (no HA imports)
+│       ├── sensor.py                  # Sensor entities
 │       ├── manifest.json              # Integration metadata
 │       ├── frontend/                  # Frontend source (TypeScript)
 │       │   ├── src/
@@ -103,7 +123,9 @@ A custom integration with both **custom panel** and **config flow** interfaces:
 │       │   └── rollup.config.js
 │       └── www/                       # Built frontend assets
 │           └── device-health-panel.js
+├── tests/                             # Unit tests for health.py
 ├── INSTALLATION.md                    # Setup guide
+├── MAJORDOMO.md                       # Feeding a Majordomo queue
 ├── CHANGELOG.md                       # Version history
 └── README.md                          # This file
 ```
@@ -111,7 +133,8 @@ A custom integration with both **custom panel** and **config flow** interfaces:
 ## Requirements
 
 - Home Assistant 2023.1+
-- Email notification service configured (e.g., SMTP)
+- Email notification service configured (e.g., SMTP) for the report blueprint
+- A Majordomo instance and intake token for the Majordomo blueprint (optional)
 - Python 3.11+ (for custom integration)
 
 ## License
