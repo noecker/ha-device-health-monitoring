@@ -173,6 +173,14 @@ python3 install.py
    - Click "Import Blueprint"
    - Paste: `https://github.com/noecker/ha-device-health-monitoring/blob/main/device_health_report.yaml`
 
+3. **Optional: the Majordomo blueprint**
+
+   If you run a [Majordomo](https://github.com/noecker/majordomo) queue, install
+   `device_health_majordomo.yaml` the same way (copy to
+   `/config/blueprints/automation/`, or import
+   `https://github.com/noecker/ha-device-health-monitoring/blob/main/device_health_majordomo.yaml`).
+   Its configuration is a separate flow; see [End-to-end setup with Majordomo](#end-to-end-setup-with-majordomo).
+
 ✅ **Done!** Continue to [Configuration](#configuration)
 
 ---
@@ -255,11 +263,76 @@ tail -f /config/home-assistant.log | grep device_health
 - Go to Developer Tools → States
 - Search for: `sensor.device_health_exclusions_excluded_entities`
 - Should show your excluded entities
+- A second sensor, **Problem Count**, shows the number of problem entities after
+  exclusions with `low_battery`, `unavailable` and `unknown` attributes
 
 ### Test Automation
 1. Go to your automation
 2. Click **︙** → **Run**
 3. Check your email!
+
+---
+
+## End-to-end setup with Majordomo
+
+Optional. This wires the integration into a self-hosted
+[Majordomo](https://github.com/noecker/majordomo) operations queue so the queue shows
+"3 devices with low battery" as one row linking back to the Device Health panel. The
+device list itself never leaves Home Assistant. [MAJORDOMO.md](MAJORDOMO.md) explains the
+design and the item shape; this is the order of operations across the two systems.
+
+### On the Majordomo side
+
+1. **Deploy Majordomo.** Out of scope here; its [README](https://github.com/noecker/majordomo#readme)
+   describes the image and the `web` container. The only requirement for this feed is
+   that Home Assistant can reach the `web` container over HTTPS.
+2. **Add a producer token** to the file named by `INTAKE_TOKENS_PATH` on the `web`
+   container, then restart it:
+   ```yaml
+   tokens:
+     - name: home-assistant
+       token: <at least 16 random characters>
+   ```
+   It must not be `read_only`. The name shows up as the producer on every item.
+3. **Push (optional).** The unavailable item is posted at `high` by default, which pushes
+   to your phone over ntfy only if `NTFY_URL` is set on `web`. Unset means silent.
+
+### On the Home Assistant side
+
+4. **Install the integration** (any method above) and add it under Settings → Devices &
+   Services. The Problem Count sensor is created with it; nothing to configure.
+5. **Add the `rest_command`** to `configuration.yaml`, with the URL and the
+   `Bearer <token>` string in `secrets.yaml`. The exact block is in
+   [MAJORDOMO.md § 3](MAJORDOMO.md#3-the-rest_command). Reload YAML configuration
+   (Developer Tools → YAML → REST commands) or restart.
+6. **Import the Majordomo blueprint** (Part B above) and create an automation from it:
+   - **Problem count sensor:** the integration's Problem Count sensor
+   - **Sync service:** `rest_command.majordomo_sync`
+   - **Panel URL:** the absolute URL of the Device Health panel on your instance, e.g.
+     `https://ha.example.net/device-health-exclusions`
+   - Leave the severities, settle delay (15 min) and daily re-assert (08:00) at their
+     defaults unless you have a reason
+7. **Optional, the other direction:** a `rest` sensor on Majordomo's
+   `GET /api/v1/summary` drives a wall-panel badge or an amber light. Needs a second,
+   `read_only` token. The sensor YAML is in Majordomo's
+   [docs/integrations/home-assistant.md](https://github.com/noecker/majordomo/blob/main/docs/integrations/home-assistant.md).
+
+### Verify the feed
+
+8. **Force a run:** on the new automation click **︙** → **Run**. Nothing is posted while
+   the Problem Count sensor is unavailable, so check Developer Tools → States first if
+   the run seems to do nothing.
+9. **Home Assistant side:** Settings → System → Logs. A 400 from the `rest_command`
+   means Majordomo rejected the body (usually a non-slug `source` or a relative panel
+   URL); a 401 means the token is wrong; a connection error means the URL or network.
+10. **Majordomo side:** the queue at `/?source=home-assistant` shows up to three rows,
+    and the Settings page lists `home-assistant` under producers with its accepted and
+    rejected counts for the last 24 hours. The item pane shows `meta.count` and the
+    occurrence timeline; a second forced run adds an occurrence without a new push.
+11. **Close the loop:** exclude one of the devices in the Device Health panel. Within
+    five minutes the sensor updates; after the settle delay the automation posts again
+    and the row's title drops by one. When a class reaches zero its row closes with
+    `closed_by = sync`.
 
 ---
 
@@ -357,6 +430,7 @@ Now:
 - Test your automation
 - Update exclusions via the panel (real-time updates!)
 - Customize the email template if desired
+- **Feed a Majordomo queue**: see [End-to-end setup with Majordomo](#end-to-end-setup-with-majordomo)
 
 ### Using the Custom Panel
 - Access via: **Settings → Device Health** (sidebar)

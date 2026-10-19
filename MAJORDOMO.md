@@ -85,6 +85,25 @@ automation from it:
 The automation never posts while the count sensor is unavailable, because an empty item
 list would close every device-health item as if all devices were healthy.
 
+## Verifying
+
+1. Force a run of the automation (**︙** → **Run**). Nothing is posted while the Problem
+   Count sensor is unavailable, so check it under Developer Tools → States first.
+2. On the Home Assistant side, Settings → System → Logs: a 400 from the `rest_command`
+   means Majordomo rejected the body (a non-slug `source` or a relative panel URL), a 401
+   means the token is wrong, a connection error means the URL or the network.
+3. On the Majordomo side, the queue filtered to `source=home-assistant` shows up to three
+   rows, and the Settings page lists `home-assistant` under producers with its accepted
+   and rejected counts for the last 24 hours. Open a row: `meta.count` and the occurrence
+   timeline are there, and a second forced run adds an occurrence without pushing again.
+4. Exclude one of the devices in the Device Health panel. The sensor updates within five
+   minutes, the automation posts after the settle delay, and the row's count drops by
+   one. A class at zero closes its row with `closed_by = sync`.
+
+The order of operations across both systems, including the Majordomo deployment and the
+optional reverse sensor, is in
+[INSTALLATION.md](INSTALLATION.md#end-to-end-setup-with-majordomo).
+
 ## Caveats
 
 - If Home Assistant stops posting, the items keep their last count and still look current

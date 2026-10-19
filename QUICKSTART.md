@@ -16,6 +16,9 @@ Get up and running with Device Health Monitoring in 5 minutes!
    ```bash
    /config/blueprints/automation/device_health_report.yaml
    ```
+   Running a [Majordomo](https://github.com/noecker/majordomo) queue? Also copy
+   `device_health_majordomo.yaml`; its setup is in [MAJORDOMO.md](MAJORDOMO.md) and the
+   step-by-step order in [INSTALLATION.md](INSTALLATION.md#end-to-end-setup-with-majordomo).
 
 3. Restart Home Assistant
 
@@ -35,7 +38,8 @@ Get up and running with Device Health Monitoring in 5 minutes!
 5. Select devices to exclude from the list
 6. Click **Submit**
 
-✅ A sensor `sensor.device_health_exclusions_excluded_entities` is created
+✅ A sensor `sensor.device_health_exclusions_excluded_entities` is created, plus a
+**Problem Count** sensor with the low-battery / unavailable / unknown counts
 
 ## Step 3: Create the Automation
 
