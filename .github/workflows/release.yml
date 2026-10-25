@@ -4,13 +4,16 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: write
+
 jobs:
   release:
     name: Create Release Packages
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Get version from tag
         id: get_version
@@ -34,22 +37,11 @@ jobs:
           cd complete_package
           zip -r ../device_health_monitoring-complete-${{ steps.get_version.outputs.VERSION }}.zip .
 
-      - name: Upload integration package to release
-        uses: actions/upload-release-asset@v1
+      - name: Upload packages to release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./device_health_exclusions-${{ steps.get_version.outputs.VERSION }}.zip
-          asset_name: device_health_exclusions-${{ steps.get_version.outputs.VERSION }}.zip
-          asset_content_type: application/zip
-
-      - name: Upload complete package to release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./device_health_monitoring-complete-${{ steps.get_version.outputs.VERSION }}.zip
-          asset_name: device_health_monitoring-complete-${{ steps.get_version.outputs.VERSION }}.zip
-          asset_content_type: application/zip
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            device_health_exclusions-${{ steps.get_version.outputs.VERSION }}.zip \
+            device_health_monitoring-complete-${{ steps.get_version.outputs.VERSION }}.zip \
+            --repo "${{ github.repository }}" --clobber
