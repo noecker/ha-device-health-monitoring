@@ -343,7 +343,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
   "integration_type": "helper",
   "iot_class": "local_push",
   "requirements": [],
-  "version": "1.1.0",
+  "version": "1.2.0",
   "dependencies": ["frontend"],
   "after_dependencies": ["http"]
 }
@@ -366,7 +366,7 @@ cd frontend
 ```json
 {
   "name": "device-health-exclusions-frontend",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Frontend for Device Health Exclusions Manager",
   "scripts": {
     "build": "rollup -c",
