@@ -30,7 +30,7 @@ jobs:
           mkdir -p complete_package
           cp -r custom_components complete_package/
           cp device_health_report.yaml device_health_majordomo.yaml complete_package/
-          cp README.md INSTALL.md QUICKSTART.md INSTALLATION.md MAJORDOMO.md complete_package/
+          cp README.md QUICKSTART.md INSTALLATION.md MAJORDOMO.md complete_package/
           cd complete_package
           zip -r ../device_health_monitoring-complete-${{ steps.get_version.outputs.VERSION }}.zip .
 

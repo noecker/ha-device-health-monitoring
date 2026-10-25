@@ -3,7 +3,7 @@
 ## Project Overview
 
 **Name:** Device Health Exclusions Manager for Home Assistant
-**Version:** 1.1.0
+**Version:** 1.2.0
 **Type:** Home Assistant Custom Integration + Blueprint
 **License:** MIT
 **Repository:** https://github.com/noecker/ha-device-health-monitoring
@@ -303,7 +303,20 @@ reload. Rules in `health.py` (`classify_problems`), tested by
 
 ## Version History
 
-### v1.1.0 (2025-11-21) - Current
+### v1.2.0 (2026-10-25) - Current
+**New Features:**
+- Problem Count sensor: number of problem entities after exclusions, with
+  `low_battery`, `unavailable`, `unknown` and `battery_threshold` attributes
+- Majordomo blueprint (`device_health_majordomo.yaml`) posting the per-class counts to
+  a Majordomo queue via `/api/v1/sync`
+- `health.py`: detection rules as a Home Assistant-free module with unit tests under
+  `tests/`
+
+**Docs:**
+- End-to-end Majordomo setup and verification checklist in `INSTALLATION.md`;
+  `MAJORDOMO.md` added
+
+### v1.1.0 (2025-11-21)
 **New Features:**
 - Hierarchical device grouping by integration and device
 - Device-level exclusions - exclude entire devices at once
@@ -474,5 +487,5 @@ npm run build
 
 ---
 
-*Context file generated: 2025-11-21*
-*Project Version: 1.1.0*
+*Context file updated: 2026-10-25*
+*Project Version: 1.2.0*
